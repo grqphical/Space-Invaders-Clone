@@ -1,10 +1,12 @@
 import sys
 
 import pygame
-from settings import Settings
-from ship import Ship
-from bullet import Bullet
-from alien import Alien
+from time import sleep
+from modules.settings import Settings
+from modules.ship import Ship
+from modules.alien import Alien
+from modules.bullet import Bullet
+from modules.gamestats import GameStats
 
 
 class AlienInvasion:
@@ -17,6 +19,8 @@ class AlienInvasion:
         self.bg_image = pygame.transform.scale(self.bg_image, (1200,800)).convert()
         pygame.display.set_caption("Space Invaders Clone")
         pygame.display.set_icon(pygame.image.load('images/ship.png'))
+
+        self.gameStats = GameStats(self)
 
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -32,9 +36,6 @@ class AlienInvasion:
             for bullet in self.bullets.copy():
                 if bullet.rect.bottom <= 0:
                     self.bullets.remove(bullet)
-            if pygame.sprite.spritecollideany(self.ship, self.aliens):
-                print('Ship Has Been Hit')
-
             self.update_screen()
             self.update_aliens()
             self.bullets.update()
@@ -95,6 +96,8 @@ class AlienInvasion:
     def update_aliens(self):
         self.check_fleet_edges()
         self.aliens.update()
+        if pygame.sprite.spritecollideany(self.ship, self.aliens):
+                self.ship_hit()
         
     def check_fleet_edges(self):
         for alien in self.aliens.sprites():
@@ -106,6 +109,17 @@ class AlienInvasion:
         for alien in self.aliens.sprites():
             alien.rect.y += self.settings.fleet_drop_speed
         self.settings.fleet_direction *= -1
+
+    def ship_hit(self):
+        self.gameStats.ships_left -= 1
+
+        self.aliens.empty()
+        self.bullets.empty()
+
+        self.create_fleet()
+        self.ship.center_ship()
+
+        sleep(0.5)
 if __name__ == '__main__':
     ai = AlienInvasion()
     ai.run_game()
