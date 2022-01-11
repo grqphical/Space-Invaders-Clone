@@ -13,6 +13,8 @@ class AlienInvasion:
         self.settings = Settings()
 
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
+        self.bg_image = pygame.image.load('images/background.png')
+        self.bg_image = pygame.transform.scale(self.bg_image, (1200,800)).convert()
         pygame.display.set_caption("Space Invaders Clone")
         pygame.display.set_icon(pygame.image.load('images/ship.png'))
 
@@ -25,11 +27,16 @@ class AlienInvasion:
         self.bg_colour = self.settings.bg_colour
     def run_game(self):
         while True:
+            self.screen.blit(self.bg_image,(0,0))
             self.check_events()
             for bullet in self.bullets.copy():
                 if bullet.rect.bottom <= 0:
                     self.bullets.remove(bullet)
+            if pygame.sprite.spritecollideany(self.ship, self.aliens):
+                print('Ship Has Been Hit')
+
             self.update_screen()
+            self.update_aliens()
             self.bullets.update()
             self.ship.update()
 
@@ -54,12 +61,12 @@ class AlienInvasion:
                     if mouse_presses[0]:
                         self._fire_bullet()
     def update_screen(self):
-            self.screen.fill(self.bg_colour)
-            self.ship.blitme()
-            for bullet in self.bullets.sprites():
-                bullet.draw_bullet()
-            self.aliens.draw(self.screen)
-            pygame.display.flip()
+        self.ship.blitme()
+        for bullet in self.bullets.sprites():
+            bullet.draw_bullet()
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        self.aliens.draw(self.screen)
+        pygame.display.flip()
     
     def _fire_bullet(self):
         if len(self.bullets) < self.settings.bullets_allowed:
@@ -85,6 +92,20 @@ class AlienInvasion:
         alien.rect.x = alien.x
         alien.rect.y = alien.rect.height + 2 * alien.rect.height * row
         self.aliens.add(alien)
+    def update_aliens(self):
+        self.check_fleet_edges()
+        self.aliens.update()
+        
+    def check_fleet_edges(self):
+        for alien in self.aliens.sprites():
+            if alien.check_edges():
+                self.change_fleet_direction()
+                break
+
+    def change_fleet_direction(self):
+        for alien in self.aliens.sprites():
+            alien.rect.y += self.settings.fleet_drop_speed
+        self.settings.fleet_direction *= -1
 if __name__ == '__main__':
     ai = AlienInvasion()
     ai.run_game()
