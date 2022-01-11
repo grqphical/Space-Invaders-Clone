@@ -17,7 +17,7 @@ class AlienInvasion:
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.bg_image = pygame.image.load('images/background.png')
         self.bg_image = pygame.transform.scale(self.bg_image, (1200,800)).convert()
-        pygame.display.set_caption("Space Invaders Clone")
+        pygame.display.set_caption("PyInvaders")
         pygame.display.set_icon(pygame.image.load('images/ship.png'))
 
         self.gameStats = GameStats(self)
@@ -33,13 +33,14 @@ class AlienInvasion:
         while True:
             self.screen.blit(self.bg_image,(0,0))
             self.check_events()
+            if self.gameStats.game_active:
+                self.update_aliens()
+                self.bullets.update()
+                self.ship.update()
             for bullet in self.bullets.copy():
                 if bullet.rect.bottom <= 0:
                     self.bullets.remove(bullet)
             self.update_screen()
-            self.update_aliens()
-            self.bullets.update()
-            self.ship.update()
 
     def check_events(self):
         for event in pygame.event.get():
@@ -97,7 +98,8 @@ class AlienInvasion:
         self.check_fleet_edges()
         self.aliens.update()
         if pygame.sprite.spritecollideany(self.ship, self.aliens):
-                self.ship_hit()
+            self.ship_hit()
+        self.check_aliens_bottom()
         
     def check_fleet_edges(self):
         for alien in self.aliens.sprites():
@@ -111,7 +113,10 @@ class AlienInvasion:
         self.settings.fleet_direction *= -1
 
     def ship_hit(self):
-        self.gameStats.ships_left -= 1
+        if self.gameStats.ships_left > 0:
+            self.gameStats.ships_left -= 1
+        else:
+            self.gameStats.game_active = False
 
         self.aliens.empty()
         self.bullets.empty()
@@ -120,6 +125,13 @@ class AlienInvasion:
         self.ship.center_ship()
 
         sleep(0.5)
+
+    def check_aliens_bottom(self):
+        screen_rect = self.screen.get_rect()
+        for alien in self.aliens.sprites():
+            if alien.rect.bottom > screen_rect.bottom:
+                self.ship_hit()
+                break
 if __name__ == '__main__':
     ai = AlienInvasion()
     ai.run_game()
