@@ -6,8 +6,8 @@ class Button:
         self.screen = ai_game.screen
         self.screen_rect = self.screen.get_rect()
 
-        self.width, self.height = 200, 50
-        self.button_colour = (0,255,0)
+        self.width, self.height = 400, 50
+        self.button_colour = (100,100,100)
         self.text_colour = (255,255,255)
         self.font = pygame.font.SysFont('Helvetica', 48)
 
