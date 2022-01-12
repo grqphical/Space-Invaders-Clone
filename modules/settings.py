@@ -26,3 +26,7 @@ class Settings:
         self.alien_speed *= 1.1
         self.bullet_speed *= 1.1
         self.ship_speed *= 1.1
+    def reset_settings(self):
+        self.alien_speed = 0.5
+        self.ship_speed = 1.5
+        self.bullet_speed = 1.5
