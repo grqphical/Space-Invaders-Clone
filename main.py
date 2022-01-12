@@ -153,6 +153,8 @@ class AlienInvasion:
 
         self.create_fleet()
         self.ship.center_ship()
+        self.gameStats.reset_stats()
+        self.settings.reset_stats()
 
         sleep(0.5)
     # This is to check if the aliens have reached the bottom which means game over
